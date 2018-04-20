@@ -19,7 +19,7 @@ INDEX_LIST = ['000001', '000002', '000003', '000004', '000005', '000006', '00000
 #startDate = input("Input Start Date (%s) : " %defaultStartDate)
 #endDate = input("Input End Date (%s) : " %defaultEndDate)
 
-startIdx = input("Input Start Num : ")
+startIdx = int(input("Input Start Num : "))
 
 currIdx = 0
 for code in INDEX_LIST:
