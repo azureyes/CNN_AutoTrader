@@ -110,7 +110,7 @@ train_cross_entropy_list = []
 test_cross_entropy_list = []
 
 def TrainingDataProcess(trainData, labelData, rowReaded, epochCount, trainCount):
-    sess.run(train_step, feed_dict={xs: trainData, ys: labelData, keep_prob:0.25})
+    sess.run(train_step, feed_dict={xs: trainData, ys: labelData, keep_prob:0.5})
     if trainCount % 100 == 0:
         trainSetAccuracy,train_cross_entropy = ComputeAccuracy(trainData,labelData)
         testSetAccuracy,test_cross_entropy = ComputeAccuracy(testData1,labelData1)
