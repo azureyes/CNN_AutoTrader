@@ -1,0 +1,7 @@
+
+NetworkSaver/checkpoint
+NetworkSaver/model.ckpt.data-00000-of-00001
+NetworkSaver/model.ckpt.index
+*.csv
+*.meta
+__pycache__/DataSet.cpython-36.pyc
