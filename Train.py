@@ -107,24 +107,22 @@ if ckpt and ckpt.model_checkpoint_path:
     print('Network Restore ok! ...')
 
 train_cross_entropy_list = []
-test_cross_entropy_list = []
 
 def TrainingDataProcess(trainData, labelData, rowReaded, epochCount, trainCount):
-    sess.run(train_step, feed_dict={xs: trainData, ys: labelData, keep_prob:0.5})
+    sess.run(train_step, feed_dict={xs: trainData, ys: labelData, keep_prob:0.25})
     if trainCount % 100 == 0:
         trainSetAccuracy,train_cross_entropy = ComputeAccuracy(trainData,labelData)
-        testSetAccuracy,test_cross_entropy = ComputeAccuracy(testData1,labelData1)
         trainSetAccuracy*=100
-        testSetAccuracy*=100
         train_cross_entropy_list.append(train_cross_entropy)
-        test_cross_entropy_list.append(test_cross_entropy)
         if len(train_cross_entropy_list)>1000:
             del train_cross_entropy_list[0]
-        if len(test_cross_entropy_list)>1000:
-            del test_cross_entropy_list[0]
-        print('BatchCount=%d , Epoch=%d , Accuracy(TrainSet:%0.2f%% [%f] , TestSet:%0.2f%% [%f])' %(trainCount, epochCount, trainSetAccuracy, train_cross_entropy, testSetAccuracy, test_cross_entropy))
+
+        print('BatchCount=%d , Epoch=%d , Accuracy(TrainSet:%0.2f%% [%f])' %(trainCount, epochCount, trainSetAccuracy, train_cross_entropy))
     if trainCount % 3001 == 0:
         #保持网络
+        testSetAccuracy,test_cross_entropy = ComputeAccuracy(testData1,labelData1)
+        testSetAccuracy*=100
+        print('TestSet Accuracy(%0.2f%% [%f])' %(testSetAccuracy,test_cross_entropy))
         SaverNetwork()
         Plot()
         
@@ -141,7 +139,6 @@ def Plot():
     plt.xlabel('Step')
     plt.ylabel('Cross Entropy')
     plt.plot(train_cross_entropy_list, color=[1,0,0], label='TrainSet')
-    plt.plot(test_cross_entropy_list, color=[0,0,1], label='TestSet')
     plt.legend()
     plt.show()
 
