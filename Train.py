@@ -69,20 +69,20 @@ b_conv3 = BiasVariable([40])
 h_conv3 = tf.nn.relu(Conv2d(h_pool2, W_conv3) + b_conv3)
 h_pool3 = MaxPool2x2(h_conv3)
 
-##conv2d layer = 4#
+#conv2d layer = 4#
 W_conv4 = WeightVariable([1,2,40,80])
 b_conv4 = BiasVariable([80])
 h_conv4 = tf.nn.relu(Conv2d(h_pool3, W_conv4) + b_conv4)
 h_pool4 = MaxPool2x2(h_conv4)
 
 ## full connect layer =1#
-W_fc1 = WeightVariable([1*4*80, 128])
-b_fc1 = BiasVariable([128])
-h_pool2_flat = tf.reshape(h_pool2, [-1, 1*4*80])
-h_fc1 = tf.nn.relu(tf.matmul(h_pool2_flat, W_fc1) + b_fc1)
+W_fc1 = WeightVariable([1*4*80, 32])
+b_fc1 = BiasVariable([32])
+h_pool4_flat = tf.reshape(h_pool4, [-1, 1*4*80])
+h_fc1 = tf.nn.relu(tf.matmul(h_pool4_flat, W_fc1) + b_fc1)
 h_fc1_drop = tf.nn.dropout(h_fc1, keep_prob)
 
-W_fc2 = WeightVariable([128, 2])
+W_fc2 = WeightVariable([32, 2])
 b_fc2 = BiasVariable([2])
 prediction = tf.nn.softmax(tf.matmul(h_fc1_drop, W_fc2)+b_fc2)
 
@@ -90,7 +90,7 @@ cross_entropy = tf.reduce_mean(-tf.reduce_sum(ys * tf.log(tf.clip_by_value(predi
                                               reduction_indices=[1]))
 
 global_step = tf.Variable(0)
-learning_rate = tf.train.exponential_decay(1e-4, global_step, 27000, 0.97, staircase=True)
+learning_rate = tf.train.exponential_decay(1e-3, global_step, 5000, 0.9, staircase=True)
 
 train_step = tf.train.AdamOptimizer(learning_rate).minimize(cross_entropy, global_step=global_step)
 
@@ -111,26 +111,26 @@ test_cross_entropy_list = []
 
 def TrainingDataProcess(trainData, labelData, rowReaded, epochCount, trainCount):
     sess.run(train_step, feed_dict={xs: trainData, ys: labelData, keep_prob:0.5})
-    if trainCount % 100 == 0:
+    if trainCount % 50 == 0:
         trainSetAccuracy,train_cross_entropy = ComputeAccuracy(trainData,labelData)
+        testSetAccuracy,test_cross_entropy = ComputeAccuracy(testData1,labelData1)
         trainSetAccuracy*=100
+        testSetAccuracy*=100
         train_cross_entropy_list.append(train_cross_entropy)
+        test_cross_entropy_list.append(test_cross_entropy)
         if len(train_cross_entropy_list)>1000:
             del train_cross_entropy_list[0]
-
-        print('BatchCount=%d , Epoch=%d , Accuracy(TrainSet:%0.2f%% [%f])' %(trainCount, epochCount, trainSetAccuracy, train_cross_entropy))
+        if len(test_cross_entropy_list)>1000:
+            del test_cross_entropy_list[0]
+        print('BatchCount=%d , Epoch=%d , Accuracy(TrainSet:%0.2f%% [%f] , TestSet:%0.2f%% [%f])' %(trainCount, epochCount, trainSetAccuracy, train_cross_entropy, testSetAccuracy, test_cross_entropy))
     if trainCount % 3001 == 0:
         #保持网络
-        testSetAccuracy,test_cross_entropy = ComputeAccuracy(testData1,labelData1)
-        testSetAccuracy*=100
-        print('TestSet Accuracy(%0.2f%% [%f])' %(testSetAccuracy,test_cross_entropy))
-        test_cross_entropy_list.append(test_cross_entropy)
         SaverNetwork()
         Plot()
         
 def SaverNetwork():
     print('Saving ...')
-    save_path = saver.save(sess, 'NetworkSaver/model.ckpt')
+    save_path = saver.save(sess, 'NetworkSaver/model.ckpt', write_meta_graph=False)
     print("Saved to : ", save_path)
     lr = sess.run(learning_rate)
     print('Curr Learning Rate : %f' %lr)
@@ -141,19 +141,12 @@ def Plot():
     plt.xlabel('Step')
     plt.ylabel('Cross Entropy')
     plt.plot(train_cross_entropy_list, color=[1,0,0], label='TrainSet')
-    plt.legend()
-    plt.show()
-    
-    plt.figure(figsize=(6,3))
-    plt.title('Cross Entropy Record')
-    plt.xlabel('Step')
-    plt.ylabel('Cross Entropy')
     plt.plot(test_cross_entropy_list, color=[0,0,1], label='TestSet')
     plt.legend()
     plt.show()
 
 
-myTrainData.LoopData(100, 1000, TrainingDataProcess)
+myTrainData.LoopData(200, 1000, TrainingDataProcess)
 
 
 exit
