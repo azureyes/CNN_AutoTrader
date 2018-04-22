@@ -50,16 +50,22 @@ h_conv3 = tf.nn.relu(Conv2d(h_pool2, W_conv3) + b_conv3)
 h_pool3 = MaxPool2x2(h_conv3)
 
 #conv2d layer = 4#
-W_conv4 = WeightVariable([1,2,40,80])
-b_conv4 = BiasVariable([80])
-h_conv4 = tf.nn.relu(Conv2d(h_pool3, W_conv4) + b_conv4)
-h_pool4 = MaxPool2x2(h_conv4)
+#W_conv4 = WeightVariable([1,2,40,80])
+#b_conv4 = BiasVariable([80])
+#h_conv4 = tf.nn.relu(Conv2d(h_pool3, W_conv4) + b_conv4)
+#h_pool4 = MaxPool2x2(h_conv4)
+
+#conv2d layer = 5#
+#W_conv5 = WeightVariable([1,2,80,160])
+#b_conv5 = BiasVariable([160])
+#h_conv5 = tf.nn.relu(Conv2d(h_pool4, W_conv5) + b_conv5)
+#h_pool5 = MaxPool2x2(h_conv5)
 
 ## full connect layer =1#
-W_fc1 = WeightVariable([1*4*80, 32])
+W_fc1 = WeightVariable([1*8*40, 32])
 b_fc1 = BiasVariable([32])
-h_pool4_flat = tf.reshape(h_pool4, [-1, 1*4*80])
-h_fc1 = tf.nn.relu(tf.matmul(h_pool4_flat, W_fc1) + b_fc1)
+h_pool3_flat = tf.reshape(h_pool3, [-1, 1*4*80])
+h_fc1 = tf.nn.relu(tf.matmul(h_pool3_flat, W_fc1) + b_fc1)
 h_fc1_drop = tf.nn.dropout(h_fc1, keep_prob)
 
 W_fc2 = WeightVariable([32, 2])
