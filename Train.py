@@ -76,7 +76,7 @@ h_conv4 = tf.nn.relu(Conv2d(h_pool3, W_conv4) + b_conv4)
 h_pool4 = MaxPool2x2(h_conv4)
 
 #conv2d layer = 5#
-#W_conv5 = WeightVariable([1,2,80,160])
+#W_conv5 = WeightVariable([1,3,80,160])
 #b_conv5 = BiasVariable([160])
 #h_conv5 = tf.nn.relu(Conv2d(h_pool4, W_conv5) + b_conv5)
 #h_pool5 = MaxPool2x2(h_conv5)
@@ -96,7 +96,7 @@ cross_entropy = tf.reduce_mean(-tf.reduce_sum(ys * tf.log(tf.clip_by_value(predi
                                               reduction_indices=[1]))
 
 global_step = tf.Variable(0)
-learning_rate = tf.train.exponential_decay(1e-4, global_step, 10000, 0.97)
+learning_rate = tf.train.exponential_decay(1e-4, global_step, 10000, 0.7071)
 
 train_step = tf.train.AdamOptimizer(learning_rate).minimize(cross_entropy, global_step=global_step)
 
@@ -116,7 +116,7 @@ train_cross_entropy_list = []
 test_cross_entropy_list = []
 
 def TrainingDataProcess(trainData, labelData, rowReaded, epochCount, trainCount):
-    sess.run(train_step, feed_dict={xs: trainData, ys: labelData, keep_prob:0.0625})
+    sess.run(train_step, feed_dict={xs: trainData, ys: labelData, keep_prob:0.125})
     if trainCount % 50 == 0:
         trainSetAccuracy,train_cross_entropy = ComputeAccuracy(trainData,labelData)
         testSetAccuracy,test_cross_entropy = ComputeAccuracy(testData1,labelData1)

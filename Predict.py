@@ -56,7 +56,7 @@ h_conv4 = tf.nn.relu(Conv2d(h_pool3, W_conv4) + b_conv4)
 h_pool4 = MaxPool2x2(h_conv4)
 
 #conv2d layer = 5#
-#W_conv5 = WeightVariable([1,2,80,160])
+#W_conv5 = WeightVariable([1,3,80,160])
 #b_conv5 = BiasVariable([160])
 #h_conv5 = tf.nn.relu(Conv2d(h_pool4, W_conv5) + b_conv5)
 #h_pool5 = MaxPool2x2(h_conv5)
