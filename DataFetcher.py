@@ -73,8 +73,8 @@ for code in INDEX_LIST:
         table['DOWN'] = None
         
         for i in range(0, RANGE_END):
-            growth = float(df['close'][i+64]) / float(df['close'][i+63]) - 1
-            kdatapart = df[i:i+64]
+            growth = float(df['close'][(i+TRAIN_DAYS)]) / float(df['close'][(i+TRAIN_DAYS)-1]) - 1
+            kdatapart = df[i:i+TRAIN_DAYS]
             kdatapart = kdatapart.reset_index(drop=True)
             lowlist = []
             volumelist = []

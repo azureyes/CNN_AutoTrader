@@ -43,17 +43,17 @@ b_conv2 = BiasVariable([20])
 h_conv2 = tf.nn.relu(Conv2d(h_pool1, W_conv2) + b_conv2)
 h_pool2 = MaxPool2x2(h_conv2)
 
-##conv2d layer = 3#
+#conv2d layer = 3#
 W_conv3 = WeightVariable([1,2,20,40])
 b_conv3 = BiasVariable([40])
 h_conv3 = tf.nn.relu(Conv2d(h_pool2, W_conv3) + b_conv3)
 h_pool3 = MaxPool2x2(h_conv3)
 
 #conv2d layer = 4#
-#W_conv4 = WeightVariable([1,2,40,80])
-#b_conv4 = BiasVariable([80])
-#h_conv4 = tf.nn.relu(Conv2d(h_pool3, W_conv4) + b_conv4)
-#h_pool4 = MaxPool2x2(h_conv4)
+W_conv4 = WeightVariable([1,2,40,80])
+b_conv4 = BiasVariable([80])
+h_conv4 = tf.nn.relu(Conv2d(h_pool3, W_conv4) + b_conv4)
+h_pool4 = MaxPool2x2(h_conv4)
 
 #conv2d layer = 5#
 #W_conv5 = WeightVariable([1,2,80,160])
@@ -62,18 +62,19 @@ h_pool3 = MaxPool2x2(h_conv3)
 #h_pool5 = MaxPool2x2(h_conv5)
 
 ## full connect layer =1#
-W_fc1 = WeightVariable([1*8*40, 32])
-b_fc1 = BiasVariable([32])
-h_pool3_flat = tf.reshape(h_pool3, [-1, 1*4*80])
-h_fc1 = tf.nn.relu(tf.matmul(h_pool3_flat, W_fc1) + b_fc1)
+W_fc1 = WeightVariable([1*4*80, 128])
+b_fc1 = BiasVariable([128])
+h_pool4_flat = tf.reshape(h_pool4, [-1, 1*4*80])
+h_fc1 = tf.nn.relu(tf.matmul(h_pool4_flat, W_fc1) + b_fc1)
 h_fc1_drop = tf.nn.dropout(h_fc1, keep_prob)
 
-W_fc2 = WeightVariable([32, 2])
+W_fc2 = WeightVariable([128, 2])
 b_fc2 = BiasVariable([2])
 prediction = tf.nn.softmax(tf.matmul(h_fc1_drop, W_fc2)+b_fc2)
 
 cross_entropy = tf.reduce_mean(-tf.reduce_sum(ys * tf.log(tf.clip_by_value(prediction, 1e-7, 1.0)),
                                               reduction_indices=[1]))
+
 
 train_step = tf.train.AdamOptimizer(1e-4).minimize(cross_entropy)
 
