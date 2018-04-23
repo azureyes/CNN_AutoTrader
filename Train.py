@@ -96,7 +96,7 @@ cross_entropy = tf.reduce_mean(-tf.reduce_sum(ys * tf.log(tf.clip_by_value(predi
                                               reduction_indices=[1]))
 
 global_step = tf.Variable(0)
-learning_rate = tf.train.exponential_decay(1e-4, global_step, 10000, 1.0)
+learning_rate = tf.train.exponential_decay(1e-4, global_step, 10000, 0.97)
 
 train_step = tf.train.AdamOptimizer(learning_rate).minimize(cross_entropy, global_step=global_step)
 
@@ -116,7 +116,7 @@ train_cross_entropy_list = []
 test_cross_entropy_list = []
 
 def TrainingDataProcess(trainData, labelData, rowReaded, epochCount, trainCount):
-    sess.run(train_step, feed_dict={xs: trainData, ys: labelData, keep_prob:0.25})
+    sess.run(train_step, feed_dict={xs: trainData, ys: labelData, keep_prob:0.0625})
     if trainCount % 50 == 0:
         trainSetAccuracy,train_cross_entropy = ComputeAccuracy(trainData,labelData)
         testSetAccuracy,test_cross_entropy = ComputeAccuracy(testData1,labelData1)
