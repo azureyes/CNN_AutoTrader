@@ -56,7 +56,7 @@ for code in INDEX_LIST:
         
         #data process
         TRAIN_DAYS = 64
-        PERDICT_DAYS = 2
+        PERDICT_DAYS = 1
         RANGE_END = rows-TRAIN_DAYS-(PERDICT_DAYS-1)
         
         if rows<=TRAIN_DAYS+(PERDICT_DAYS-1):
@@ -109,7 +109,7 @@ for code in INDEX_LIST:
                 feeddata.append(unified_vol)
             up = 1.0
             down = 0.0
-            if growth*100.0>=0.9:
+            if growth*100.0>=0.7:
                 up = 1.0
                 down = 0.0
             else:
