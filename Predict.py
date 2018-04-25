@@ -62,13 +62,13 @@ h_pool4 = MaxPool2x2(h_conv4)
 #h_pool5 = MaxPool2x2(h_conv5)
 
 ## full connect layer =1#
-W_fc1 = WeightVariable([1*4*80, 128])
-b_fc1 = BiasVariable([128])
+W_fc1 = WeightVariable([1*4*80, 32])
+b_fc1 = BiasVariable([32])
 h_pool4_flat = tf.reshape(h_pool4, [-1, 1*4*80])
 h_fc1 = tf.nn.relu(tf.matmul(h_pool4_flat, W_fc1) + b_fc1)
 h_fc1_drop = tf.nn.dropout(h_fc1, keep_prob)
 
-W_fc2 = WeightVariable([128, 2])
+W_fc2 = WeightVariable([32, 2])
 b_fc2 = BiasVariable([2])
 prediction = tf.nn.softmax(tf.matmul(h_fc1_drop, W_fc2)+b_fc2)
 
@@ -91,7 +91,6 @@ if ckpt and ckpt.model_checkpoint_path:
     print('Network Restore (%s) ok! ...' %(ckpt.model_checkpoint_path))
     #储存成中间格式可以网站上使用
     conv1_weight = sess.run(W_conv1)
-    print(conv1_weight)
     conv1_bias = sess.run(b_conv1)
     conv2_weight = sess.run(W_conv2)
     conv2_bias = sess.run(b_conv2)
@@ -126,7 +125,9 @@ while True:
         print('\n')
         break
     indexList.append(i)
-    possDict[i] = [] 
+    possDict[i] = []
+    
+KDAYS = 64
     
 while True:
    
@@ -136,7 +137,7 @@ while True:
         del df['date']
         del df['code']
         l = len(df)
-        df = df[l-64:l]
+        df = df[l-KDAYS:l]
         kdatapart = df.reset_index(drop=True)
         lowlist = []
         volumelist = []

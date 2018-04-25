@@ -75,13 +75,13 @@ h_pool4 = MaxPool2x2(h_conv4)
 #h_pool5 = MaxPool2x2(h_conv5)
 
 ## full connect layer =1#
-W_fc1 = WeightVariable([1*4*80, 128])
-b_fc1 = BiasVariable([128])
+W_fc1 = WeightVariable([1*4*80, 32])
+b_fc1 = BiasVariable([32])
 h_pool4_flat = tf.reshape(h_pool4, [-1, 1*4*80])
 h_fc1 = tf.nn.relu(tf.matmul(h_pool4_flat, W_fc1) + b_fc1)
 h_fc1_drop = tf.nn.dropout(h_fc1, keep_prob)
 
-W_fc2 = WeightVariable([128, 2])
+W_fc2 = WeightVariable([32, 2])
 b_fc2 = BiasVariable([2])
 prediction = tf.nn.softmax(tf.matmul(h_fc1_drop, W_fc2)+b_fc2)
 
@@ -110,12 +110,14 @@ totalline = len(df)
 if totalline<65:
     print('Too few data, cannot sim trading!')
     exit()
+    
+KDAYS = 64
 
 groundTruthList = []
 feeddatalist = []
 
 for i in range(0, totalline-64):
-    groundTruthList.append(float(df['close'][i+64]) / float(df['close'][i+63]))    
+    groundTruthList.append(float(df['close'][i+KDAYS]) / float(df['close'][i+(KDAYS-1)]))    
     kdatapart = df[i:i+64]
     kdatapart = kdatapart.reset_index(drop=True)
     lowlist = []

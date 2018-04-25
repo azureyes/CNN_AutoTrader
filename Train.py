@@ -82,13 +82,13 @@ h_pool4 = MaxPool2x2(h_conv4)
 #h_pool5 = MaxPool2x2(h_conv5)
 
 ## full connect layer =1#
-W_fc1 = WeightVariable([1*4*80, 128])
-b_fc1 = BiasVariable([128])
+W_fc1 = WeightVariable([1*4*80, 32])
+b_fc1 = BiasVariable([32])
 h_pool4_flat = tf.reshape(h_pool4, [-1, 1*4*80])
 h_fc1 = tf.nn.relu(tf.matmul(h_pool4_flat, W_fc1) + b_fc1)
 h_fc1_drop = tf.nn.dropout(h_fc1, keep_prob)
 
-W_fc2 = WeightVariable([128, 2])
+W_fc2 = WeightVariable([32, 2])
 b_fc2 = BiasVariable([2])
 prediction = tf.nn.softmax(tf.matmul(h_fc1_drop, W_fc2)+b_fc2)
 
@@ -116,7 +116,7 @@ train_cross_entropy_list = []
 test_cross_entropy_list = []
 
 def TrainingDataProcess(trainData, labelData, rowReaded, epochCount, trainCount):
-    sess.run(train_step, feed_dict={xs: trainData, ys: labelData, keep_prob:0.125})
+    sess.run(train_step, feed_dict={xs: trainData, ys: labelData, keep_prob:0.5})
     if trainCount % 50 == 0:
         trainSetAccuracy,train_cross_entropy = ComputeAccuracy(trainData,labelData)
         testSetAccuracy,test_cross_entropy = ComputeAccuracy(testData1,labelData1)
