@@ -96,7 +96,7 @@ cross_entropy = tf.reduce_mean(-tf.reduce_sum(ys * tf.log(tf.clip_by_value(predi
                                               reduction_indices=[1]))
 
 global_step = tf.Variable(0)
-learning_rate = tf.train.exponential_decay(1e-4, global_step, 10000, 0.7071)
+learning_rate = tf.train.exponential_decay(1e-4, global_step, 9000, 0.7071)
 
 train_step = tf.train.AdamOptimizer(learning_rate).minimize(cross_entropy, global_step=global_step)
 
