@@ -39,10 +39,10 @@ startDate = input('Input Start Date:')
 endDate = input('Input End Date:')
 
 #定义CNN
-xs = tf.placeholder(tf.float32, [None, 320])
+xs = tf.placeholder(tf.float32, [None, 80])
 ys = tf.placeholder(tf.float32, [None, 2])
 keep_prob = tf.placeholder(tf.float32)
-x_image = tf.reshape(xs, [-1, 1, 64, 5])
+x_image = tf.reshape(xs, [-1, 1, 16, 5])
 
 ##conv2d layer =1#
 W_conv1 = WeightVariable([1,2,5,10])
@@ -68,20 +68,14 @@ b_conv4 = BiasVariable([80])
 h_conv4 = tf.nn.relu(Conv2d(h_pool3, W_conv4) + b_conv4)
 h_pool4 = MaxPool2x2(h_conv4)
 
-#conv2d layer = 5#
-W_conv5 = WeightVariable([1,2,80,160])
-b_conv5 = BiasVariable([160])
-h_conv5 = tf.nn.relu(Conv2d(h_pool4, W_conv5) + b_conv5)
-h_pool5 = MaxPool2x2(h_conv5)
-
 ## full connect layer =1#
-W_fc1 = WeightVariable([1*2*160, 32])
-b_fc1 = BiasVariable([32])
-h_pool5_flat = tf.reshape(h_pool5, [-1, 1*4*80])
-h_fc1 = tf.nn.relu(tf.matmul(h_pool5_flat, W_fc1) + b_fc1)
+W_fc1 = WeightVariable([1*1*80, 16])
+b_fc1 = BiasVariable([16])
+h_pool4_flat = tf.reshape(h_pool4, [-1, 1*1*80])
+h_fc1 = tf.nn.relu(tf.matmul(h_pool4_flat, W_fc1) + b_fc1)
 h_fc1_drop = tf.nn.dropout(h_fc1, keep_prob)
 
-W_fc2 = WeightVariable([32, 2])
+W_fc2 = WeightVariable([16, 2])
 b_fc2 = BiasVariable([2])
 prediction = tf.nn.softmax(tf.matmul(h_fc1_drop, W_fc2)+b_fc2)
 
@@ -111,14 +105,14 @@ if totalline<65:
     print('Too few data, cannot sim trading!')
     exit()
     
-KDAYS = 64
+KDAYS = 16
 
 groundTruthList = []
 feeddatalist = []
 
-for i in range(0, totalline-64):
+for i in range(0, totalline-KDAYS):
     groundTruthList.append(float(df['close'][i+KDAYS]) / float(df['close'][i+(KDAYS-1)]))    
-    kdatapart = df[i:i+64]
+    kdatapart = df[i:i+KDAYS]
     kdatapart = kdatapart.reset_index(drop=True)
     lowlist = []
     volumelist = []
@@ -161,7 +155,7 @@ predictTotal = 0.000001
 for i in range(0, len(groundTruthList)):
     growth = groundTruthList[i]
     feeddata = feeddatalist[i]
-    inputData = np.array(feeddata).reshape(1, 320)
+    inputData = np.array(feeddata).reshape(1, KDAYS*5)
     currPred = sess.run(prediction, feed_dict={xs:inputData, keep_prob:1})
     choice = sess.run(tf.argmax(currPred,1))[0]
     upPoss = currPred[0][0]
@@ -175,10 +169,10 @@ for i in range(0, len(groundTruthList)):
     benchmark_netvalue = benchmark_netvalue * growth
     benchmark_netvalue_list.append(benchmark_netvalue)
     if has_position==False:
-        if upPoss>0.55:
+        if upPoss>0.6:
             has_position=True
     else:
-        if upPoss<0.45:
+        if upPoss<0.6:
             has_position=False
     if has_position==True:
         simtrade_netvalue = simtrade_netvalue * growth

@@ -6,6 +6,7 @@ Created on Fri Apr 13 10:25:23 2018
 """
 import tensorflow as tf
 import matplotlib.pyplot as plt
+import os, sys
 
 from DataSet import TrainDataSet
 from DataSet import TestDataSet
@@ -36,20 +37,20 @@ def ComputeAccuracy(v_xs, v_ys):
     return result,result1
 
 #获得验证集
-myTestData = TestDataSet('TestingData', 320, 2)
+myTestData = TestDataSet('TestingData', 80, 2)
 testData1,labelData1 = myTestData.GetData()
 
 #获得训练集
-myTrainData = TrainDataSet('TrainingData', 320, 2)
+myTrainData = TrainDataSet('TrainingData', 80, 2)
 
 #开始训练按ENTER继续
 input("\nPress ENTER key to continue...")
 
 #定义CNN
-xs = tf.placeholder(tf.float32, [None, 320])
+xs = tf.placeholder(tf.float32, [None, 80])
 ys = tf.placeholder(tf.float32, [None, 2])
 keep_prob = tf.placeholder(tf.float32)
-x_image = tf.reshape(xs, [-1, 1, 64, 5])
+x_image = tf.reshape(xs, [-1, 1, 16, 5])
 
 ##conv2d layer =1#
 W_conv1 = WeightVariable([1,2,5,10])
@@ -75,20 +76,14 @@ b_conv4 = BiasVariable([80])
 h_conv4 = tf.nn.relu(Conv2d(h_pool3, W_conv4) + b_conv4)
 h_pool4 = MaxPool2x2(h_conv4)
 
-#conv2d layer = 5#
-W_conv5 = WeightVariable([1,2,80,160])
-b_conv5 = BiasVariable([160])
-h_conv5 = tf.nn.relu(Conv2d(h_pool4, W_conv5) + b_conv5)
-h_pool5 = MaxPool2x2(h_conv5)
-
 ## full connect layer =1#
-W_fc1 = WeightVariable([1*2*160, 32])
-b_fc1 = BiasVariable([32])
-h_pool5_flat = tf.reshape(h_pool5, [-1, 1*4*80])
-h_fc1 = tf.nn.relu(tf.matmul(h_pool5_flat, W_fc1) + b_fc1)
+W_fc1 = WeightVariable([1*1*80, 16])
+b_fc1 = BiasVariable([16])
+h_pool4_flat = tf.reshape(h_pool4, [-1, 1*1*80])
+h_fc1 = tf.nn.relu(tf.matmul(h_pool4_flat, W_fc1) + b_fc1)
 h_fc1_drop = tf.nn.dropout(h_fc1, keep_prob)
 
-W_fc2 = WeightVariable([32, 2])
+W_fc2 = WeightVariable([16, 2])
 b_fc2 = BiasVariable([2])
 prediction = tf.nn.softmax(tf.matmul(h_fc1_drop, W_fc2)+b_fc2)
 
@@ -96,7 +91,7 @@ cross_entropy = tf.reduce_mean(-tf.reduce_sum(ys * tf.log(tf.clip_by_value(predi
                                               reduction_indices=[1]))
 
 global_step = tf.Variable(0)
-learning_rate = tf.train.exponential_decay(1e-4, global_step, 10000, 0.7071)
+learning_rate = tf.train.exponential_decay(1e-3, global_step, 10000, 0.95)
 
 train_step = tf.train.AdamOptimizer(learning_rate).minimize(cross_entropy, global_step=global_step)
 

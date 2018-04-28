@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Created on Wed Apr 18 20:26:02 2018
+Created on Fri Apr 27 22:58:24 2018
 
 @author: Administrator
 """
@@ -9,7 +9,6 @@ import tushare as ts
 import tensorflow as tf
 import matplotlib.pyplot as plt
 import numpy as np
-import time
 
 def WeightVariable(shape):
     initial = tf.truncated_normal(shape, stddev=0.1)
@@ -82,55 +81,22 @@ sess.run(init)
 ckpt = tf.train.get_checkpoint_state('NetworkSaver/')
 if ckpt and ckpt.model_checkpoint_path:
     saver.restore(sess, ckpt.model_checkpoint_path)
-    print('Network Restore (%s) ok! ...' %(ckpt.model_checkpoint_path))
-    #储存成中间格式可以网站上使用
-    conv1_weight = sess.run(W_conv1)
-    conv1_bias = sess.run(b_conv1)
-    conv2_weight = sess.run(W_conv2)
-    conv2_bias = sess.run(b_conv2)
-    conv3_weight = sess.run(W_conv3)
-    conv3_bias = sess.run(b_conv3)
-    conv4_weight = sess.run(W_conv4)
-    conv4_bias = sess.run(b_conv4)
-    fc1_weight = sess.run(W_fc1)
-    fc1_bias = sess.run(b_fc1)
-    fc2_weight = sess.run(W_fc2)
-    fc2_bias = sess.run(b_fc2)
-    np.save('NetworkSaver/conv1_weight.npy', conv1_weight)
-    np.save('NetworkSaver/conv1_bias.npy', conv1_bias)
-    np.save('NetworkSaver/conv2_weight.npy', conv2_weight)
-    np.save('NetworkSaver/conv2_bias.npy', conv2_bias)
-    np.save('NetworkSaver/conv3_weight.npy', conv3_weight)
-    np.save('NetworkSaver/conv3_bias.npy', conv3_bias)     
-    np.save('NetworkSaver/conv4_weight.npy', conv4_weight)
-    np.save('NetworkSaver/conv4_bias.npy', conv4_bias)
-    np.save('NetworkSaver/fc1_weight.npy', fc1_weight)
-    np.save('NetworkSaver/fc1_bias.npy', fc1_bias)     
-    np.save('NetworkSaver/fc2_weight.npy', fc2_weight)
-    np.save('NetworkSaver/fc2_bias.npy', fc2_bias)       
-
-
-#输入需要预测的指数代码
-indexList = []
-possDict = {}
-while True:
-    i = input('Input Index Code (Enter For End) : ')
-    if i=='':
-        print('\n')
-        break
-    indexList.append(i)
-    possDict[i] = []
+    print('Network Restore ok! ...')
     
+stocklist = ts.get_stock_basics()
+stocklist = list(stocklist.index)
+
 KDAYS = 16
-    
-while True:
-   
-    for code in indexList:
-        
-        df = ts.get_k_data(code, index=True)
-        del df['date']
-        del df['code']
+
+sortStockList = []
+
+count = 0
+for stock in stocklist:
+    try:
+        df = ts.get_k_data(stock, index=False)
         l = len(df)
+        if l<KDAYS:
+            continue
         df = df[l-KDAYS:l]
         kdatapart = df.reset_index(drop=True)
         lowlist = []
@@ -163,21 +129,28 @@ while True:
         currPred = sess.run(prediction, feed_dict={xs:inputData, keep_prob:1})
         upPoss = currPred[0][0]
         downPoss = currPred[0][1]
-        print('Index : %s , Up Chance: %0.2f%% ' %(code, upPoss*100))
-        possDict[code].append(upPoss)
+        print('统计已完成 %0.2f%%' %(float(count)/len(stocklist)*100.0))
+        sortStockList.append([stock, upPoss])
+    except:
+        pass
+    count+=1
     
-    plt.figure(figsize=(12,7))
-    plt.title('Up Possibilty Chart\n')
-    plt.xlabel('Time')
-    plt.ylabel('Possibilty')
+#按照上涨概率排序（从小到大）
+
+sortStockList.sort(key=lambda x:x[1], reverse=False)
+
+low20 = sortStockList[0:20]
+high20 = sortStockList[len(sortStockList)-20:len(sortStockList)]
+
+print('最低概率-----------------------------------')
+for item in low20:
+    print('%s 明日上涨概率为 : %0.2f%%' %(item[0], item[1]*100.0))
     
-    for code in possDict.keys():
-        possList = possDict[code]
-        plt.plot(possList, linewidth=2.0, label=code)
+print('最高概率-----------------------------------')
+for item in high20:
+    print('%s 明日上涨概率为 : %0.2f%%' %(item[0], item[1]*100.0))    
+
     
-    plt.legend(loc='upper left')
-    plt.show()
     
-    print('\n Wait For 1 Minute ... \n')
-    time.sleep(60)
+    
     
