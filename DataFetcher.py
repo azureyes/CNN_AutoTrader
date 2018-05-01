@@ -53,6 +53,7 @@ for code in INDEX_LIST:
         df = ts.get_k_data(code, index=isIndex, start=str(startDate), end=str(endDate))
         del df['date']
         del df['code']
+        df = df.reset_index(drop=True)
         
         rows = len(df)
         
