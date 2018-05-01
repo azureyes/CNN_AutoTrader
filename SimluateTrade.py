@@ -152,6 +152,9 @@ alpha_list = []
 has_position = False
 predictRight = 0.0
 predictTotal = 0.000001
+
+BUY_LINE = 0.6
+
 for i in range(0, len(groundTruthList)):
     growth = groundTruthList[i]
     feeddata = feeddatalist[i]
@@ -161,24 +164,24 @@ for i in range(0, len(groundTruthList)):
     upPoss = currPred[0][0]
     upPoss_list.append(upPoss)
     newGrowth = growth-1.0
-    if newGrowth>=0.0/100.0 and choice==0:
-        predictRight += 1.0
-    if newGrowth<0.0/100.0 and choice==1:
+    if upPoss>=BUY_LINE and newGrowth>0.0:
         predictRight += 1.0
     
     benchmark_netvalue = benchmark_netvalue * growth
     benchmark_netvalue_list.append(benchmark_netvalue)
     if has_position==False:
-        if upPoss>0.6:
+        if upPoss>BUY_LINE:
             has_position=True
     else:
-        if upPoss<0.6:
+        if upPoss<BUY_LINE:
             has_position=False
     if has_position==True:
         simtrade_netvalue = simtrade_netvalue * growth
     simtrade_netvalue_list.append(simtrade_netvalue)
     alpha_list.append(simtrade_netvalue/benchmark_netvalue-1)
-    predictTotal += 1.0
+    
+    if upPoss>=BUY_LINE:
+        predictTotal += 1.0
     
     if i%30==0:
         percent = i/float(len(groundTruthList))
