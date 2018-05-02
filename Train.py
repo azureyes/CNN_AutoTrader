@@ -6,7 +6,7 @@ Created on Fri Apr 13 10:25:23 2018
 """
 import tensorflow as tf
 import matplotlib.pyplot as plt
-import os, sys
+import os, sys, gc
 
 from DataSet import TrainDataSet
 from DataSet import TestDataSet
@@ -91,7 +91,7 @@ cross_entropy = tf.reduce_mean(-tf.reduce_sum(ys * tf.log(tf.clip_by_value(predi
                                               reduction_indices=[1]))
 
 global_step = tf.Variable(0)
-learning_rate = tf.train.exponential_decay(1e-3, global_step, 10000, 0.95)
+learning_rate = tf.train.exponential_decay(1e-3, global_step, 15000, 0.95)
 
 train_step = tf.train.AdamOptimizer(learning_rate).minimize(cross_entropy, global_step=global_step)
 
@@ -135,6 +135,7 @@ def SaverNetwork():
     print("Saved to : ", save_path)
     lr = sess.run(learning_rate)
     print('Curr Learning Rate : %f' %lr)
+    gc.collect()
 
 def Plot():
     plt.figure(figsize=(12,7))

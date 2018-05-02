@@ -51,6 +51,10 @@ class TrainDataSet(object):
                                                    self.dataSizeCount:self.dataSizeCount+self.labelSizeCount]).reshape(step,self.labelSizeCount)
     
                     dataProcessFunc(trainData, labelData, step, epoch+1, trainCount)
+                    
+                    del trainData
+                    del labelData
+                    
                     trainCount+=1
 
 
