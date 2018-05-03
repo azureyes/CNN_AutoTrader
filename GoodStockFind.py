@@ -9,6 +9,7 @@ import tushare as ts
 import tensorflow as tf
 import matplotlib.pyplot as plt
 import numpy as np
+from datetime import date
 
 def WeightVariable(shape):
     initial = tf.truncated_normal(shape, stddev=0.1)
@@ -87,6 +88,8 @@ stocklist = ts.get_stock_basics()
 stocklist = list(stocklist.index)
 
 KDAYS = 16
+TODAY_STR = str(date.today())
+print('Today is %s' %TODAY_STR)
 
 sortStockList = []
 
@@ -99,6 +102,10 @@ for stock in stocklist:
             continue
         df = df[l-KDAYS:l]
         kdatapart = df.reset_index(drop=True)
+        lastTradeDate = str(kdatapart['date'][len(kdatapart)-1])
+        if TODAY_STR!=lastTradeDate:
+            print('%s is paused Today! skip it!' %stock)
+            continue
         lowlist = []
         volumelist = []
         feeddata = []
@@ -129,7 +136,7 @@ for stock in stocklist:
         currPred = sess.run(prediction, feed_dict={xs:inputData, keep_prob:1})
         upPoss = currPred[0][0]
         downPoss = currPred[0][1]
-        print('统计已完成 %0.2f%%' %(float(count)/len(stocklist)*100.0))
+        print('Statistics proceed %0.2f%%' %(float(count)/len(stocklist)*100.0))
         sortStockList.append([stock, upPoss])
     except:
         pass
@@ -142,13 +149,13 @@ sortStockList.sort(key=lambda x:x[1], reverse=False)
 low20 = sortStockList[0:20]
 high20 = sortStockList[len(sortStockList)-20:len(sortStockList)]
 
-print('最低概率-----------------------------------')
+print('Lowest Chance-----------------------------------')
 for item in low20:
-    print('%s 明日上涨概率为 : %0.2f%%' %(item[0], item[1]*100.0))
+    print('%s Rise Chance Tomorrow : %0.2f%%' %(item[0], item[1]*100.0))
     
-print('最高概率-----------------------------------')
+print('Highest Chance-----------------------------------')
 for item in high20:
-    print('%s 明日上涨概率为 : %0.2f%%' %(item[0], item[1]*100.0))    
+    print('%s Rise Chance Tomorrow : %0.2f%%' %(item[0], item[1]*100.0))    
 
     
     
