@@ -84,8 +84,35 @@ if ckpt and ckpt.model_checkpoint_path:
     saver.restore(sess, ckpt.model_checkpoint_path)
     print('Network Restore ok! ...')
     
-stocklist = ts.get_stock_basics()
-stocklist = list(stocklist.index)
+stocklist_all = ts.get_today_all()
+stocklist = list(stocklist_all.code)
+namelist = list(stocklist_all.name)
+stocktonames = {}
+for i in range(0, len(stocklist)):
+    code = stocklist[i]
+    name = namelist[i]
+    stocktonames[code] = name
+print('\n')
+
+def stockwithname(code):
+    if code in stocktonames.keys():
+        return '%s[%s]' %(code, stocktonames[code])
+    return code
+
+def isstockst(code):
+    if code not in stocktonames.keys():
+        return False
+    name = stocktonames[code]
+    if 'ST' in name:
+        return True
+    return False
+
+def isrisestop(kdatapart):
+    close1 = kdatapart['close'][len(kdatapart)-1]
+    close2 = kdatapart['close'][len(kdatapart)-2]
+    if close1/close2-1>0.098:
+        return True
+    return False
 
 KDAYS = 16
 TODAY_STR = str(date.today())
@@ -104,7 +131,13 @@ for stock in stocklist:
         kdatapart = df.reset_index(drop=True)
         lastTradeDate = str(kdatapart['date'][len(kdatapart)-1])
         if TODAY_STR!=lastTradeDate:
-            print('%s is paused Today! skip it!' %stock)
+            print('%s is paused Today! skip it!' %stockwithname(stock))
+            continue
+        if isstockst(stock) == True:
+            print('%s is Special Treatment! skip it!' %stockwithname(stock))
+            continue
+        if isrisestop(kdatapart)==True:
+            print('%s is Rise Stop! skip it!' %stockwithname(stock))
             continue
         lowlist = []
         volumelist = []
@@ -136,7 +169,8 @@ for stock in stocklist:
         currPred = sess.run(prediction, feed_dict={xs:inputData, keep_prob:1})
         upPoss = currPred[0][0]
         downPoss = currPred[0][1]
-        print('Statistics proceed %0.2f%%' %(float(count)/len(stocklist)*100.0))
+        if count % 50 == 0:
+            print('Statistics proceed %0.2f%%' %(float(count)/len(stocklist)*100.0))
         sortStockList.append([stock, upPoss])
     except:
         pass
@@ -151,11 +185,11 @@ high20 = sortStockList[len(sortStockList)-20:len(sortStockList)]
 
 print('Lowest Chance-----------------------------------')
 for item in low20:
-    print('%s Rise Chance Tomorrow : %0.2f%%' %(item[0], item[1]*100.0))
+    print('%s Rise Chance Tomorrow : %0.2f%%' %(stockwithname(item[0]), item[1]*100.0))
     
 print('Highest Chance-----------------------------------')
 for item in high20:
-    print('%s Rise Chance Tomorrow : %0.2f%%' %(item[0], item[1]*100.0))    
+    print('%s Rise Chance Tomorrow : %0.2f%%' %(stockwithname(item[0]), item[1]*100.0))    
 
     
     
