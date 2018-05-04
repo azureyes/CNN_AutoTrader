@@ -28,12 +28,8 @@ def MaxPool2x2(x):
 
 def ComputeAccuracy(v_xs, v_ys):
     y_pre = sess.run(prediction, feed_dict={xs: v_xs, keep_prob: 1})
-    correct_prediction = tf.equal(tf.argmax(y_pre,1), tf.argmax(v_ys,1))
-    accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
-    cross_entropy = tf.reduce_mean(-tf.reduce_sum(v_ys * tf.log(tf.clip_by_value(y_pre, 1e-7, 1.0)),
-                                              reduction_indices=[1]))
-    result = sess.run(accuracy, feed_dict={xs: v_xs, ys: v_ys, keep_prob: 1})
-    result1 = sess.run(cross_entropy, feed_dict={xs: v_xs, ys: v_ys, keep_prob: 1})
+    result = sess.run(accuracy, feed_dict={xs: v_xs, ys: v_ys, ypre:y_pre, vys:v_ys, keep_prob: 1})
+    result1 = sess.run(cross_entropy, feed_dict={xs: v_xs, ys: v_ys, ypre:y_pre, vys:v_ys, keep_prob: 1})
     return result,result1
 
 #获得验证集
@@ -106,6 +102,17 @@ ckpt = tf.train.get_checkpoint_state('NetworkSaver/')
 if ckpt and ckpt.model_checkpoint_path:
     saver.restore(sess, ckpt.model_checkpoint_path)
     print('Network Restore ok! ...')
+
+#计算正确率和交叉熵
+ypre = tf.placeholder(tf.float32, [None, 2])
+vys = tf.placeholder(tf.float32, [None, 2])
+correct_prediction = tf.equal(tf.argmax(ypre,1), tf.argmax(vys,1))
+accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
+cross_entropy = tf.reduce_mean(-tf.reduce_sum(vys * tf.log(tf.clip_by_value(ypre, 1e-7, 1.0)),
+                                              reduction_indices=[1]))
+
+#固定住图，后面不准再修改了    
+sess.graph.finalize()    
 
 train_cross_entropy_list = []
 test_cross_entropy_list = []
