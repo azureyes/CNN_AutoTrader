@@ -10,6 +10,7 @@ import tensorflow as tf
 import matplotlib.pyplot as plt
 import numpy as np
 from datetime import date
+import datetime
 
 def WeightVariable(shape):
     initial = tf.truncated_normal(shape, stddev=0.1)
@@ -117,6 +118,12 @@ def isrisestop(kdatapart):
 KDAYS = 16
 TODAY_STR = str(date.today())
 print('Today is %s' %TODAY_STR)
+
+#如果是星期六或者星期天。则好回退到上周五的工作日
+weekday = date.today().weekday()
+if weekday>4:
+    offsetday = weekday - 4
+    TODAY_STR = str(date.today() - datetime.timedelta(days=offsetday))
 
 sortStockList = []
 
