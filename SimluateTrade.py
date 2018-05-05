@@ -153,7 +153,9 @@ has_position = False
 predictRight = 0.0
 predictTotal = 0.000001
 
-BUY_LINE = 0.6
+BUY_LINE = 0.65
+TRADE_COST = 0.0015
+TAX_COST = 0.001
 
 for i in range(0, len(groundTruthList)):
     growth = groundTruthList[i]
@@ -172,8 +174,12 @@ for i in range(0, len(groundTruthList)):
     if has_position==False:
         if upPoss>BUY_LINE:
             has_position=True
+            simtrade_netvalue -= simtrade_netvalue * TRADE_COST
     else:
         if upPoss<BUY_LINE:
+            if has_position==True:
+                simtrade_netvalue -= simtrade_netvalue * TRADE_COST
+                simtrade_netvalue -= simtrade_netvalue * TAX_COST
             has_position=False
     if has_position==True:
         simtrade_netvalue = simtrade_netvalue * growth
