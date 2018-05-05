@@ -28,8 +28,8 @@ def MaxPool2x2(x):
 
 def ComputeAccuracy(v_xs, v_ys):
     y_pre = sess.run(prediction, feed_dict={xs: v_xs, keep_prob: 1})
-    result = sess.run(accuracy, feed_dict={xs: v_xs, ys: v_ys, ypre:y_pre, vys:v_ys, keep_prob: 1})
-    result1 = sess.run(cross_entropy, feed_dict={xs: v_xs, ys: v_ys, ypre:y_pre, vys:v_ys, keep_prob: 1})
+    result = sess.run(accuracy1, feed_dict={xs: v_xs, ys: v_ys, ypre1:y_pre, vys1:v_ys, keep_prob: 1})
+    result1 = sess.run(cross_entropy1, feed_dict={xs: v_xs, ys: v_ys, ypre1:y_pre, vys1:v_ys, keep_prob: 1})
     return result,result1
 
 #获得验证集
@@ -87,13 +87,23 @@ cross_entropy = tf.reduce_mean(-tf.reduce_sum(ys * tf.log(tf.clip_by_value(predi
                                               reduction_indices=[1]))
 
 global_step = tf.Variable(0)
-learning_rate = tf.train.exponential_decay(1e-3, global_step, 15000, 0.95)
+learning_rate = tf.train.exponential_decay(1e-3, global_step, 18000, 0.95)
 
 train_step = tf.train.AdamOptimizer(learning_rate).minimize(cross_entropy, global_step=global_step)
 
-saver = tf.train.Saver()
+#计算正确率和交叉熵
+ypre1 = tf.placeholder(tf.float32, [None, 2])
+vys1 = tf.placeholder(tf.float32, [None, 2])
+correct_prediction1 = tf.equal(tf.argmax(ypre1,1), tf.argmax(vys1,1))
+accuracy1 = tf.reduce_mean(tf.cast(correct_prediction1, tf.float32))
+cross_entropy1 = tf.reduce_mean(-tf.reduce_sum(vys1 * tf.log(tf.clip_by_value(ypre1, 1e-7, 1.0)),
+                                              reduction_indices=[1]))
 
+saver = tf.train.Saver()
 sess = tf.Session()
+
+#固定住图，后面不准再修改了 (for debug only!)   
+#sess.graph.finalize()   
 
 init = tf.global_variables_initializer()
 sess.run(init)
@@ -102,17 +112,6 @@ ckpt = tf.train.get_checkpoint_state('NetworkSaver/')
 if ckpt and ckpt.model_checkpoint_path:
     saver.restore(sess, ckpt.model_checkpoint_path)
     print('Network Restore ok! ...')
-
-#计算正确率和交叉熵
-ypre = tf.placeholder(tf.float32, [None, 2])
-vys = tf.placeholder(tf.float32, [None, 2])
-correct_prediction = tf.equal(tf.argmax(ypre,1), tf.argmax(vys,1))
-accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
-cross_entropy = tf.reduce_mean(-tf.reduce_sum(vys * tf.log(tf.clip_by_value(ypre, 1e-7, 1.0)),
-                                              reduction_indices=[1]))
-
-#固定住图，后面不准再修改了    
-sess.graph.finalize()    
 
 train_cross_entropy_list = []
 test_cross_entropy_list = []
@@ -126,9 +125,9 @@ def TrainingDataProcess(trainData, labelData, rowReaded, epochCount, trainCount)
         testSetAccuracy*=100
         train_cross_entropy_list.append(train_cross_entropy)
         test_cross_entropy_list.append(test_cross_entropy)
-        if len(train_cross_entropy_list)>1000:
+        if len(train_cross_entropy_list)>100000:
             del train_cross_entropy_list[0]
-        if len(test_cross_entropy_list)>1000:
+        if len(test_cross_entropy_list)>100000:
             del test_cross_entropy_list[0]
         print('BatchCount=%d , Epoch=%d , Accuracy(TrainSet:%0.2f%% [%f] , TestSet:%0.2f%% [%f])' %(trainCount, epochCount, trainSetAccuracy, train_cross_entropy, testSetAccuracy, test_cross_entropy))
     if trainCount % 3001 == 0:

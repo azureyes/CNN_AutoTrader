@@ -153,8 +153,8 @@ has_position = False
 predictRight = 0.0
 predictTotal = 0.000001
 
-BUY_LINE = 0.65
-TRADE_COST = 0.0015
+BUY_LINE = 0.6
+TRADE_COST = 0.00025
 TAX_COST = 0.001
 
 for i in range(0, len(groundTruthList)):

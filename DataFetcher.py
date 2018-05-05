@@ -115,7 +115,7 @@ for code in INDEX_LIST:
                 feeddata.append(unified_vol)
             up = 1.0
             down = 0.0
-            if growth*100.0>=0.0:
+            if growth*100.0>=0.16:
                 up = 1.0
                 down = 0.0
             else:
