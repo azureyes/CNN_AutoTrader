@@ -94,13 +94,15 @@ for code in INDEX_LIST:
             kdatapart = df[i:i+TRAIN_DAYS]
             kdatapart = kdatapart.reset_index(drop=True)
             lowlist = []
+            highlist = []
             volumelist = []
             feeddata = []
             for j in range(0, len(kdatapart)):
                 lowlist.append(float(kdatapart['low'][j]))
+                highlist.append(float(kdatapart['high'][j]))
                 volumelist.append(float(kdatapart['volume'][j]))
             low_min = min(lowlist)
-            low_max = max(lowlist)
+            low_max = max(highlist)
             volume_min = min(volumelist)
             volume_max = max(volumelist)
             for j in range(0, len(kdatapart)):

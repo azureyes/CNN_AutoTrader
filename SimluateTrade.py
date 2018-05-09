@@ -115,13 +115,15 @@ for i in range(0, totalline-KDAYS):
     kdatapart = df[i:i+KDAYS]
     kdatapart = kdatapart.reset_index(drop=True)
     lowlist = []
+    highlist = []
     volumelist = []
     feeddata = []
     for j in range(0, len(kdatapart)):
         lowlist.append(float(kdatapart['low'][j]))
+        highlist.append(float(kdatapart['high'][j]))
         volumelist.append(float(kdatapart['volume'][j]))
     low_min = min(lowlist)
-    low_max = max(lowlist)
+    low_max = max(highlist)
     volume_min = min(volumelist)
     volume_max = max(volumelist)
     for j in range(0, len(kdatapart)):
@@ -153,7 +155,7 @@ has_position = False
 predictRight = 0.0
 predictTotal = 0.000001
 
-BUY_LINE = 0.65
+BUY_LINE = 0.7
 TRADE_COST = 0.00025
 TAX_COST = 0.001
 
