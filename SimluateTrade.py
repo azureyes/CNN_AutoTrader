@@ -155,9 +155,14 @@ has_position = False
 predictRight = 0.0
 predictTotal = 0.000001
 
-BUY_LINE = 0.7
+BUY_LINE = 0.85
 TRADE_COST = 0.00025
 TAX_COST = 0.001
+
+LOSE_WEIGHT = 1.0
+WIN_WEIGHT = 1.0
+HIT_COUNT = 0.0
+TOTAL_COUNT = 0.00001
 
 for i in range(0, len(groundTruthList)):
     growth = groundTruthList[i]
@@ -170,6 +175,15 @@ for i in range(0, len(groundTruthList)):
     newGrowth = growth-1.0
     if upPoss>=BUY_LINE and newGrowth>0.0:
         predictRight += 1.0
+        
+    if upPoss>=BUY_LINE and newGrowth>0.0:
+        WIN_WEIGHT*=(1+newGrowth)
+    if upPoss>=BUY_LINE and newGrowth<0.0:
+        LOSE_WEIGHT*=(1-newGrowth)
+        
+    TOTAL_COUNT+=1.0
+    if upPoss>=BUY_LINE:
+        HIT_COUNT+=1.0
     
     benchmark_netvalue = benchmark_netvalue * growth
     benchmark_netvalue_list.append(benchmark_netvalue)
@@ -213,5 +227,7 @@ plt.legend(loc='upper left')
 plt.show()
 
 print('Accuracy : %0.2f%%' %(predictRight/predictTotal*100.0))
+print('Profit&loss Ratio : %0.2f' %(WIN_WEIGHT/LOSE_WEIGHT))
+print('Hit Rate : %0.2f%%' %(HIT_COUNT/TOTAL_COUNT*100.0))
 print('Benchmark NetValue : %f' %(benchmark_netvalue))
 print('Simtrade NetValue : %f' %(simtrade_netvalue))
