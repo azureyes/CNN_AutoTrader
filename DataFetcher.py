@@ -100,6 +100,9 @@ for code in INDEX_LIST:
             growth = open_next / open_prev - 1
             kdatapart = df[i:i+TRAIN_DAYS]
             kdatapart = kdatapart.reset_index(drop=True)
+            
+            #print(kdatapart)
+            #print(open_next,open_prev,growth)
 
             lowlist = []
             highlist = []
