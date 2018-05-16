@@ -162,7 +162,7 @@ has_position = False
 predictRight = 0.0
 predictTotal = 0.000001
 
-BUY_LINE = 0.70
+BUY_LINE = 0.75
 TRADE_COST = 0.00025
 TAX_COST = 0.001
 
@@ -225,13 +225,13 @@ plt.plot(benchmark_netvalue_list, linewidth=1.0, color=[0,0,1], label='Benchmark
 plt.legend(loc='upper left')
 plt.show()
 
-plt.figure(figsize=(12,7))
-plt.title('%s Alpha Chart\n' %indexCode)
-plt.xlabel('Days')
-plt.ylabel('Alpha')
-plt.plot(alpha_list, linewidth=1.0, color=[1,0,0], label='Alpha')
-plt.legend(loc='upper left')
-plt.show()
+#plt.figure(figsize=(12,7))
+#plt.title('%s Alpha Chart\n' %indexCode)
+#plt.xlabel('Days')
+#plt.ylabel('Alpha')
+#plt.plot(alpha_list, linewidth=1.0, color=[1,0,0], label='Alpha')
+#plt.legend(loc='upper left')
+#plt.show()
 
 print('Accuracy : %0.2f%%' %(predictRight/predictTotal*100.0))
 print('Profit&loss Ratio : %0.2f' %((WIN_WEIGHT-1)/(LOSE_WEIGHT-0.999999)))
