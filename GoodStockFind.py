@@ -150,20 +150,27 @@ for stock in stocklist:
         highlist = []
         volumelist = []
         feeddata = []
+        
+        lowpart = kdatapart['low']
+        highpart = kdatapart['high']
+        volpart = kdatapart['volume']
+        openpart = kdatapart['open']
+        closepart = kdatapart['close']
+        
         for j in range(0, len(kdatapart)):
-            lowlist.append(float(kdatapart['low'][j]))
-            highlist.append(float(kdatapart['high'][j]))
-            volumelist.append(float(kdatapart['volume'][j]))
+            lowlist.append(float(lowpart[j]))
+            highlist.append(float(highpart[j]))
+            volumelist.append(float(volpart[j]))
         low_min = min(lowlist)
         low_max = max(highlist)
         volume_min = min(volumelist)
         volume_max = max(volumelist)
         for j in range(0, len(kdatapart)):
-            fopen = float(kdatapart['open'][j])
-            fclose = float(kdatapart['close'][j])
-            fhigh = float(kdatapart['high'][j])
-            flow = float(kdatapart['low'][j])
-            fvolume = float(kdatapart['volume'][j])
+            fopen = float(openpart[j])
+            fclose = float(closepart[j])
+            fhigh = float(highpart[j])
+            flow = float(lowpart[j])
+            fvolume = float(volpart[j])
             unified_open = (fopen-low_min)/(low_max-low_min)
             unified_close = (fclose-low_min)/(low_max-low_min)
             unified_high = (fhigh-low_min)/(low_max-low_min)
@@ -174,6 +181,7 @@ for stock in stocklist:
             feeddata.append(unified_high)
             feeddata.append(unified_low)
             feeddata.append(unified_vol)
+            
         inputData = np.array(feeddata).reshape(1, KDAYS*5)
         currPred = sess.run(prediction, feed_dict={xs:inputData, keep_prob:1})
         upPoss = currPred[0][0]

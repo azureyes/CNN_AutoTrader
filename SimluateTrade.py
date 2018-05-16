@@ -110,28 +110,35 @@ KDAYS = 16
 groundTruthList = []
 feeddatalist = []
 
-for i in range(0, totalline-KDAYS):
-    groundTruthList.append(float(df['close'][i+KDAYS]) / float(df['close'][i+(KDAYS-1)]))    
+for i in range(0, totalline-KDAYS-1):
+    groundTruthList.append(float(df['close'][i+KDAYS]) / float(df['close'][i+KDAYS-1]))    
     kdatapart = df[i:i+KDAYS]
     kdatapart = kdatapart.reset_index(drop=True)
     lowlist = []
     highlist = []
     volumelist = []
     feeddata = []
+    
+    lowpart = kdatapart['low']
+    highpart = kdatapart['high']
+    volpart = kdatapart['volume']
+    openpart = kdatapart['open']
+    closepart = kdatapart['close']
+    
     for j in range(0, len(kdatapart)):
-        lowlist.append(float(kdatapart['low'][j]))
-        highlist.append(float(kdatapart['high'][j]))
-        volumelist.append(float(kdatapart['volume'][j]))
+        lowlist.append(float(lowpart[j]))
+        highlist.append(float(highpart[j]))
+        volumelist.append(float(volpart[j]))
     low_min = min(lowlist)
     low_max = max(highlist)
     volume_min = min(volumelist)
     volume_max = max(volumelist)
     for j in range(0, len(kdatapart)):
-        fopen = float(kdatapart['open'][j])
-        fclose = float(kdatapart['close'][j])
-        fhigh = float(kdatapart['high'][j])
-        flow = float(kdatapart['low'][j])
-        fvolume = float(kdatapart['volume'][j])
+        fopen = float(openpart[j])
+        fclose = float(closepart[j])
+        fhigh = float(highpart[j])
+        flow = float(lowpart[j])
+        fvolume = float(volpart[j])
         unified_open = (fopen-low_min)/(low_max-low_min)
         unified_close = (fclose-low_min)/(low_max-low_min)
         unified_high = (fhigh-low_min)/(low_max-low_min)
@@ -155,7 +162,7 @@ has_position = False
 predictRight = 0.0
 predictTotal = 0.000001
 
-BUY_LINE = 0.85
+BUY_LINE = 0.70
 TRADE_COST = 0.00025
 TAX_COST = 0.001
 
@@ -227,7 +234,7 @@ plt.legend(loc='upper left')
 plt.show()
 
 print('Accuracy : %0.2f%%' %(predictRight/predictTotal*100.0))
-print('Profit&loss Ratio : %0.2f' %(WIN_WEIGHT/LOSE_WEIGHT))
+print('Profit&loss Ratio : %0.2f' %((WIN_WEIGHT-1)/(LOSE_WEIGHT-0.999999)))
 print('Hit Rate : %0.2f%%' %(HIT_COUNT/TOTAL_COUNT*100.0))
 print('Benchmark NetValue : %f' %(benchmark_netvalue))
 print('Simtrade NetValue : %f' %(simtrade_netvalue))
