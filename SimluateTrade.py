@@ -27,16 +27,24 @@ def MaxPool2x2(x):
 #输入指数代码
 indexCode = input('Input Code:')
 #股票或者指数
-type = input('1-Stock 2-Index:')
-if type=='1':
-    isIndex = False
-else:
+type = input('1-Stock(Default) 2-Index:')
+if type=='2':
     isIndex = True
+else:
+    isIndex = False
+
+defaultStartDate = '1997-01-01'
+defaultEndDate = '2005-01-01'
 
 #输入开始日期
-startDate = input('Input Start Date:')
+startDate = input('Input Start Date (%s as Default):' %defaultStartDate)
 #输入结束日期
-endDate = input('Input End Date:')
+endDate = input('Input End Date (%s as Default):' %defaultEndDate)
+
+if startDate=='':
+    startDate=defaultStartDate
+if endDate=='':
+    endDate=defaultEndDate
 
 #定义CNN
 xs = tf.placeholder(tf.float32, [None, 80])
@@ -162,7 +170,17 @@ has_position = False
 predictRight = 0.0
 predictTotal = 0.000001
 
-BUY_LINE = 0.7
+BUY_LINE = 0.70
+
+BUY_LINE_CLUSTER        = [0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9] 
+HAS_POSITION_CLUSTER    = [False, False, False, False, False, False, False, False, False]
+NET_VALUE_CLUSTER       = [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
+NET_VALUE_LIST_CLUSTER  = [[], [], [], [], [], [], [], [], []]
+LOSE_WEIGHT_CLUSTER     = [0.00001, 0.00001, 0.00001, 0.00001, 0.00001, 0.00001, 0.00001, 0.00001, 0.00001]
+WIN_WEIGHT_CLUSTER      = [0.00001, 0.00001, 0.00001, 0.00001, 0.00001, 0.00001, 0.00001, 0.00001, 0.00001]
+TRADE_DAYS_CLUSTER      = [0.00001, 0.00001, 0.00001, 0.00001, 0.00001, 0.00001, 0.00001, 0.00001, 0.00001]
+CLUSTER_COUNT           = len(BUY_LINE_CLUSTER)
+
 TRADE_COST = 0.00025
 TAX_COST = 0.001
 
@@ -206,6 +224,31 @@ for i in range(0, len(groundTruthList)):
             has_position=False
     if has_position==True:
         simtrade_netvalue = simtrade_netvalue * growth
+        
+    #calc cluster
+    for j in range(0, CLUSTER_COUNT):
+        if upPoss>=BUY_LINE_CLUSTER[j] and newGrowth>0.0:
+            WIN_WEIGHT_CLUSTER[j]+=newGrowth*NET_VALUE_CLUSTER[j]
+        if upPoss>=BUY_LINE_CLUSTER[j] and newGrowth<0.0:
+            LOSE_WEIGHT_CLUSTER[j]+=(-newGrowth)*NET_VALUE_CLUSTER[j]
+            
+        if upPoss>=BUY_LINE_CLUSTER[j]:
+            TRADE_DAYS_CLUSTER[j]+=1.0
+            
+        if HAS_POSITION_CLUSTER[j]==False:
+            if upPoss>BUY_LINE_CLUSTER[j]:
+                HAS_POSITION_CLUSTER[j]=True
+                NET_VALUE_CLUSTER[j] -= NET_VALUE_CLUSTER[j] * TRADE_COST
+        else:
+            if upPoss<BUY_LINE_CLUSTER[j]:
+                if HAS_POSITION_CLUSTER[j]==True:
+                    NET_VALUE_CLUSTER[j] -= NET_VALUE_CLUSTER[j] * TRADE_COST
+                    NET_VALUE_CLUSTER[j] -= NET_VALUE_CLUSTER[j] * TAX_COST
+                HAS_POSITION_CLUSTER[j]=False
+        if HAS_POSITION_CLUSTER[j]==True:
+            NET_VALUE_CLUSTER[j] = NET_VALUE_CLUSTER[j] * growth
+        NET_VALUE_LIST_CLUSTER[j].append(NET_VALUE_CLUSTER[j])
+        
     simtrade_netvalue_list.append(simtrade_netvalue)
     alpha_list.append(simtrade_netvalue/benchmark_netvalue-1)
     
@@ -216,12 +259,24 @@ for i in range(0, len(groundTruthList)):
         percent = i/float(len(groundTruthList))
         print('Simulate Calc %0.2f%% ...' %(percent*100.0))
     
-plt.figure(figsize=(12,7))
+plt.figure(figsize=(14,8))
 plt.title('%s Sim Trade Net Value Chart\n' %indexCode)
 plt.xlabel('Days')
 plt.ylabel('NetValue')
-plt.plot(simtrade_netvalue_list, linewidth=1.0, color=[1,0,0], label='SimTrade')
+plt.plot(simtrade_netvalue_list, linewidth=5.0, color=[1,0,0], label='SimTrade')
 plt.plot(benchmark_netvalue_list, linewidth=1.0, color=[0,0,1], label='Benchmark')
+
+for j in range(0, CLUSTER_COUNT):
+    lw = 1.0
+    rankstr = ''
+    if NET_VALUE_CLUSTER[j]==max(NET_VALUE_CLUSTER):
+        lw = 2.0
+        rankstr = '(Best)'
+    elif NET_VALUE_CLUSTER[j]==min(NET_VALUE_CLUSTER):
+        lw = 2.0
+        rankstr = '(Worst)'
+    plt.plot(NET_VALUE_LIST_CLUSTER[j], linewidth=lw, label='bl %0.2f %s' %(BUY_LINE_CLUSTER[j], rankstr))
+
 plt.legend(loc='upper left')
 plt.show()
 
@@ -234,7 +289,14 @@ plt.show()
 #plt.show()
 
 print('Accuracy : %0.2f%%' %(predictRight/predictTotal*100.0))
-print('Profit&loss Ratio : %0.2f' %(WIN_WEIGHT/LOSE_WEIGHT))
+print('Profit&loss Ratio : %0.2f%%' %((WIN_WEIGHT/LOSE_WEIGHT-1)*100))
 print('Hit Rate : %0.2f%%' %(HIT_COUNT/TOTAL_COUNT*100.0))
 print('Benchmark NetValue : %f' %(benchmark_netvalue))
 print('Simtrade NetValue : %f' %(simtrade_netvalue))
+print('\n')
+for j in range(0, CLUSTER_COUNT):
+    print('Profit&loss Ratio For Cluster(%0.2f) : %0.2f%%' %(BUY_LINE_CLUSTER[j], (WIN_WEIGHT_CLUSTER[j]/LOSE_WEIGHT_CLUSTER[j]-1)*100))
+    
+print('\n')
+for j in range(0, CLUSTER_COUNT):
+    print('Profit Rate PerDay (%d/%d) For Cluster(%0.2f) : %0.2f%%' %(TRADE_DAYS_CLUSTER[j],int(TOTAL_COUNT), BUY_LINE_CLUSTER[j], (NET_VALUE_CLUSTER[j]-1)/TRADE_DAYS_CLUSTER[j]*100.0))
