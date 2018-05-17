@@ -86,6 +86,7 @@ if ckpt and ckpt.model_checkpoint_path:
     print('Network Restore ok! ...')
     
 stocklist_all = ts.get_today_all()
+stocklist_all = stocklist_all.drop_duplicates()
 stocklist = list(stocklist_all.code)
 namelist = list(stocklist_all.name)
 stocktonames = {}
@@ -206,7 +207,24 @@ for item in low20:
     
 print('Highest Chance-----------------------------------')
 for item in high20:
-    print('%s Rise Chance Tomorrow : %0.2f%%' %(stockwithname(item[0]), item[1]*100.0))    
+    print('%s Rise Chance Tomorrow : %0.2f%%' %(stockwithname(item[0]), item[1]*100.0))
+
+BUY_LINE = 0.75
+BALANCE_LINE = 0.5
+
+BUY_LINE_PASSED = 0
+BALANCE_LINE_PASSED = 0
+#计算通过率
+for item in sortStockList:
+    if item[1]>BUY_LINE:
+        BUY_LINE_PASSED+=1.0
+    if item[1]>BALANCE_LINE:
+        BALANCE_LINE_PASSED+=1.0
+print('\n')
+print('Buy Line Pass Percent: %0.2f%%' %(BUY_LINE_PASSED/len(sortStockList)*100.0))
+print('Balance Pass Percent: %0.2f%%' %(BALANCE_LINE_PASSED/len(sortStockList)*100.0))
+    
+    
 
     
     

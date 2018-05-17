@@ -263,7 +263,7 @@ plt.figure(figsize=(14,8))
 plt.title('%s Sim Trade Net Value Chart\n' %indexCode)
 plt.xlabel('Days')
 plt.ylabel('NetValue')
-plt.plot(simtrade_netvalue_list, linewidth=5.0, color=[1,0,0], label='SimTrade')
+plt.plot(simtrade_netvalue_list, linewidth=5.0, color=[1,0,0], label='SimTrade(%0.2f)' %BUY_LINE)
 plt.plot(benchmark_netvalue_list, linewidth=1.0, color=[0,0,1], label='Benchmark')
 
 for j in range(0, CLUSTER_COUNT):
