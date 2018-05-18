@@ -9,6 +9,7 @@ import tushare as ts
 import tensorflow as tf
 import matplotlib.pyplot as plt
 import numpy as np
+import random
 
 def WeightVariable(shape):
     initial = tf.truncated_normal(shape, stddev=0.1)
@@ -170,15 +171,15 @@ has_position = False
 predictRight = 0.0
 predictTotal = 0.000001
 
-BUY_LINE = 0.70
+BUY_LINE = 0.75
 
-BUY_LINE_CLUSTER        = [0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9] 
-HAS_POSITION_CLUSTER    = [False, False, False, False, False, False, False, False, False]
-NET_VALUE_CLUSTER       = [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
-NET_VALUE_LIST_CLUSTER  = [[], [], [], [], [], [], [], [], []]
-LOSE_WEIGHT_CLUSTER     = [0.00001, 0.00001, 0.00001, 0.00001, 0.00001, 0.00001, 0.00001, 0.00001, 0.00001]
-WIN_WEIGHT_CLUSTER      = [0.00001, 0.00001, 0.00001, 0.00001, 0.00001, 0.00001, 0.00001, 0.00001, 0.00001]
-TRADE_DAYS_CLUSTER      = [0.00001, 0.00001, 0.00001, 0.00001, 0.00001, 0.00001, 0.00001, 0.00001, 0.00001]
+BUY_LINE_CLUSTER        = [0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, -1] 
+HAS_POSITION_CLUSTER    = [False, False, False, False, False, False, False, False, False, False]
+NET_VALUE_CLUSTER       = [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
+NET_VALUE_LIST_CLUSTER  = [[], [], [], [], [], [], [], [], [], []]
+LOSE_WEIGHT_CLUSTER     = [0.00001, 0.00001, 0.00001, 0.00001, 0.00001, 0.00001, 0.00001, 0.00001, 0.00001, 0.00001]
+WIN_WEIGHT_CLUSTER      = [0.00001, 0.00001, 0.00001, 0.00001, 0.00001, 0.00001, 0.00001, 0.00001, 0.00001, 0.00001]
+TRADE_DAYS_CLUSTER      = [0.00001, 0.00001, 0.00001, 0.00001, 0.00001, 0.00001, 0.00001, 0.00001, 0.00001, 0.00001]
 CLUSTER_COUNT           = len(BUY_LINE_CLUSTER)
 
 TRADE_COST = 0.00025
@@ -227,20 +228,25 @@ for i in range(0, len(groundTruthList)):
         
     #calc cluster
     for j in range(0, CLUSTER_COUNT):
-        if upPoss>=BUY_LINE_CLUSTER[j] and newGrowth>0.0:
+        buyLine = BUY_LINE_CLUSTER[j]
+        if buyLine == -1:
+            buyLine = random.random()
+            upPoss = random.random()
+        
+        if upPoss>=buyLine and newGrowth>0.0:
             WIN_WEIGHT_CLUSTER[j]+=newGrowth*NET_VALUE_CLUSTER[j]
-        if upPoss>=BUY_LINE_CLUSTER[j] and newGrowth<0.0:
+        if upPoss>=buyLine and newGrowth<0.0:
             LOSE_WEIGHT_CLUSTER[j]+=(-newGrowth)*NET_VALUE_CLUSTER[j]
             
-        if upPoss>=BUY_LINE_CLUSTER[j]:
+        if upPoss>=buyLine:
             TRADE_DAYS_CLUSTER[j]+=1.0
             
         if HAS_POSITION_CLUSTER[j]==False:
-            if upPoss>BUY_LINE_CLUSTER[j]:
+            if upPoss>buyLine:
                 HAS_POSITION_CLUSTER[j]=True
                 NET_VALUE_CLUSTER[j] -= NET_VALUE_CLUSTER[j] * TRADE_COST
         else:
-            if upPoss<BUY_LINE_CLUSTER[j]:
+            if upPoss<buyLine:
                 if HAS_POSITION_CLUSTER[j]==True:
                     NET_VALUE_CLUSTER[j] -= NET_VALUE_CLUSTER[j] * TRADE_COST
                     NET_VALUE_CLUSTER[j] -= NET_VALUE_CLUSTER[j] * TAX_COST
@@ -259,12 +265,12 @@ for i in range(0, len(groundTruthList)):
         percent = i/float(len(groundTruthList))
         print('Simulate Calc %0.2f%% ...' %(percent*100.0))
     
-plt.figure(figsize=(14,8))
+plt.figure(figsize=(15,10))
 plt.title('%s Sim Trade Net Value Chart\n' %indexCode)
 plt.xlabel('Days')
 plt.ylabel('NetValue')
 plt.plot(simtrade_netvalue_list, linewidth=5.0, color=[1,0,0], label='SimTrade(%0.2f)' %BUY_LINE)
-plt.plot(benchmark_netvalue_list, linewidth=1.0, color=[0,0,1], label='Benchmark')
+plt.plot(benchmark_netvalue_list, linewidth=1.0, color=[0,0,1], linestyle='--', label='Benchmark')
 
 for j in range(0, CLUSTER_COUNT):
     lw = 1.0
@@ -275,8 +281,10 @@ for j in range(0, CLUSTER_COUNT):
     elif NET_VALUE_CLUSTER[j]==min(NET_VALUE_CLUSTER):
         lw = 2.0
         rankstr = '(Worst)'
-    plt.plot(NET_VALUE_LIST_CLUSTER[j], linewidth=lw, label='bl %0.2f %s' %(BUY_LINE_CLUSTER[j], rankstr))
-
+    if BUY_LINE_CLUSTER[j]!=-1:
+        plt.plot(NET_VALUE_LIST_CLUSTER[j], linewidth=lw, label='bl %0.2f %s' %(BUY_LINE_CLUSTER[j], rankstr))
+    else:
+        plt.plot(NET_VALUE_LIST_CLUSTER[j], linewidth=3.0, linestyle=':', label='RandomSet')
 plt.legend(loc='upper left')
 plt.show()
 
