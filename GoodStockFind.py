@@ -198,6 +198,16 @@ for stock in stocklist:
 
 sortStockList.sort(key=lambda x:x[1], reverse=False)
 
+chanceList = []
+for item in sortStockList:
+    chanceList.append(item[1])
+plt.figure(figsize=(15,10))
+plt.title('Rise Chance Hist of All Market\n')
+plt.xlabel('Chance')
+plt.ylabel('Value')
+plt.hist(chanceList, bins=100)
+plt.show()
+
 low20 = sortStockList[0:20]
 high20 = sortStockList[len(sortStockList)-20:len(sortStockList)]
 
@@ -223,6 +233,15 @@ for item in sortStockList:
 print('\n')
 print('Buy Line Pass Percent: %0.2f%%' %(BUY_LINE_PASSED/len(sortStockList)*100.0))
 print('Balance Pass Percent: %0.2f%%' %(BALANCE_LINE_PASSED/len(sortStockList)*100.0))
+
+#计算预期仓位分别
+print('\n')
+high10 = sortStockList[len(sortStockList)-10:len(sortStockList)]
+totalweight = 0.0
+for item in high10:
+    totalweight += item[1]
+for item in high10:
+    print('%s Position Level at : %0.2f%%' %(stockwithname(item[0]), item[1]/totalweight*100))
     
     
 

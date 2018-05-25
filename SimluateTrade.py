@@ -308,3 +308,4 @@ for j in range(0, CLUSTER_COUNT):
 print('\n')
 for j in range(0, CLUSTER_COUNT):
     print('Profit Rate PerDay (%d/%d) For Cluster(%0.2f) : %0.2f%%' %(TRADE_DAYS_CLUSTER[j],int(TOTAL_COUNT), BUY_LINE_CLUSTER[j], (NET_VALUE_CLUSTER[j]-1)/TRADE_DAYS_CLUSTER[j]*100.0))
+    
