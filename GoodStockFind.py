@@ -57,13 +57,13 @@ h_conv4 = tf.nn.relu(Conv2d(h_pool3, W_conv4) + b_conv4)
 h_pool4 = MaxPool2x2(h_conv4)
 
 ## full connect layer =1#
-W_fc1 = WeightVariable([1*1*80, 16])
-b_fc1 = BiasVariable([16])
+W_fc1 = WeightVariable([1*1*80, 32])
+b_fc1 = BiasVariable([32])
 h_pool4_flat = tf.reshape(h_pool4, [-1, 1*1*80])
 h_fc1 = tf.nn.relu(tf.matmul(h_pool4_flat, W_fc1) + b_fc1)
 h_fc1_drop = tf.nn.dropout(h_fc1, keep_prob)
 
-W_fc2 = WeightVariable([16, 2])
+W_fc2 = WeightVariable([32, 2])
 b_fc2 = BiasVariable([2])
 prediction = tf.nn.softmax(tf.matmul(h_fc1_drop, W_fc2)+b_fc2)
 
@@ -144,9 +144,9 @@ for stock in stocklist:
         if isstockst(stock) == True:
             print('%s is Special Treatment! skip it!' %stockwithname(stock))
             continue
-        if isrisestop(kdatapart)==True:
-            print('%s is Rise Stop! skip it!' %stockwithname(stock))
-            continue
+        #if isrisestop(kdatapart)==True:
+        #    print('%s is Rise Stop! skip it!' %stockwithname(stock))
+        #    continue
         lowlist = []
         highlist = []
         volumelist = []
@@ -208,30 +208,34 @@ plt.ylabel('Value')
 plt.hist(chanceList, bins=100)
 plt.show()
 
-low20 = sortStockList[0:20]
-high20 = sortStockList[len(sortStockList)-20:len(sortStockList)]
+low30 = sortStockList[0:30]
+high30 = sortStockList[len(sortStockList)-30:len(sortStockList)]
 
 print('Lowest Chance-----------------------------------')
-for item in low20:
+for item in low30:
     print('%s Rise Chance Tomorrow : %0.2f%%' %(stockwithname(item[0]), item[1]*100.0))
     
 print('Highest Chance-----------------------------------')
-for item in high20:
+for item in high30:
     print('%s Rise Chance Tomorrow : %0.2f%%' %(stockwithname(item[0]), item[1]*100.0))
 
-BUY_LINE = 0.75
+BUY_LINE = 0.65
+SELL_LINE = 0.35
 BALANCE_LINE = 0.5
 
-BUY_LINE_PASSED = 0
+BUY_LINE_PASSED = 0.000001
+SELL_LINE_PASSED = 0.000001
 BALANCE_LINE_PASSED = 0
 #计算通过率
 for item in sortStockList:
     if item[1]>BUY_LINE:
         BUY_LINE_PASSED+=1.0
+    if item[1]<SELL_LINE:
+        SELL_LINE_PASSED+=1.0
     if item[1]>BALANCE_LINE:
         BALANCE_LINE_PASSED+=1.0
 print('\n')
-print('Buy Line Pass Percent: %0.2f%%' %(BUY_LINE_PASSED/len(sortStockList)*100.0))
+print('Buy(%d)/Sell(%d) Line Pass Ratio: %f' %(BUY_LINE_PASSED, SELL_LINE_PASSED, BUY_LINE_PASSED/SELL_LINE_PASSED))
 print('Balance Pass Percent: %0.2f%%' %(BALANCE_LINE_PASSED/len(sortStockList)*100.0))
 
 #计算预期仓位分别

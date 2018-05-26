@@ -78,13 +78,13 @@ h_conv4 = tf.nn.relu(Conv2d(h_pool3, W_conv4) + b_conv4)
 h_pool4 = MaxPool2x2(h_conv4)
 
 ## full connect layer =1#
-W_fc1 = WeightVariable([1*1*80, 16])
-b_fc1 = BiasVariable([16])
+W_fc1 = WeightVariable([1*1*80, 32])
+b_fc1 = BiasVariable([32])
 h_pool4_flat = tf.reshape(h_pool4, [-1, 1*1*80])
 h_fc1 = tf.nn.relu(tf.matmul(h_pool4_flat, W_fc1) + b_fc1)
 h_fc1_drop = tf.nn.dropout(h_fc1, keep_prob)
 
-W_fc2 = WeightVariable([16, 2])
+W_fc2 = WeightVariable([32, 2])
 b_fc2 = BiasVariable([2])
 prediction = tf.nn.softmax(tf.matmul(h_fc1_drop, W_fc2)+b_fc2)
 
@@ -120,7 +120,8 @@ groundTruthList = []
 feeddatalist = []
 
 for i in range(0, totalline-KDAYS-1):
-    groundTruthList.append(float(df['close'][i+KDAYS]) / float(df['close'][i+KDAYS-1]))    
+    #groundTruthList.append(float(df['close'][i+KDAYS]) / float(df['close'][i+KDAYS-1]))
+    groundTruthList.append(float(df['open'][i+KDAYS+1]) / float(df['open'][i+KDAYS]))    
     kdatapart = df[i:i+KDAYS]
     kdatapart = kdatapart.reset_index(drop=True)
     lowlist = []
@@ -195,7 +196,6 @@ for i in range(0, len(groundTruthList)):
     feeddata = feeddatalist[i]
     inputData = np.array(feeddata).reshape(1, KDAYS*5)
     currPred = sess.run(prediction, feed_dict={xs:inputData, keep_prob:1})
-    choice = sess.run(tf.argmax(currPred,1))[0]
     upPoss = currPred[0][0]
     upPoss_list.append(upPoss)
     newGrowth = growth-1.0
@@ -225,6 +225,9 @@ for i in range(0, len(groundTruthList)):
             has_position=False
     if has_position==True:
         simtrade_netvalue = simtrade_netvalue * growth
+        
+    if upPoss>=BUY_LINE:
+        predictTotal += 1.0
         
     #calc cluster
     for j in range(0, CLUSTER_COUNT):
@@ -257,9 +260,6 @@ for i in range(0, len(groundTruthList)):
         
     simtrade_netvalue_list.append(simtrade_netvalue)
     alpha_list.append(simtrade_netvalue/benchmark_netvalue-1)
-    
-    if upPoss>=BUY_LINE:
-        predictTotal += 1.0
     
     if i%30==0:
         percent = i/float(len(groundTruthList))
