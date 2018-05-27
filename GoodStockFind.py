@@ -219,12 +219,34 @@ print('Highest Chance-----------------------------------')
 for item in high30:
     print('%s Rise Chance Tomorrow : %0.2f%%' %(stockwithname(item[0]), item[1]*100.0))
 
-BUY_LINE = 0.65
-SELL_LINE = 0.35
-BALANCE_LINE = 0.5
-
+BUY_LINE = 0.55
+SELL_LINE = 0.45
 BUY_LINE_PASSED = 0.000001
 SELL_LINE_PASSED = 0.000001
+
+BUY_LINE1 = 0.60
+SELL_LINE1 = 0.40
+BUY_LINE_PASSED1 = 0.000001
+SELL_LINE_PASSED1 = 0.000001
+
+BUY_LINE2 = 0.65
+SELL_LINE2 = 0.35
+BUY_LINE_PASSED2 = 0.000001
+SELL_LINE_PASSED2 = 0.000001
+
+BUY_LINE3 = 0.70
+SELL_LINE3 = 0.30
+BUY_LINE_PASSED3 = 0.000001
+SELL_LINE_PASSED3 = 0.000001
+
+BUY_LINE4 = 0.75
+SELL_LINE4 = 0.25
+BUY_LINE_PASSED4 = 0.000001
+SELL_LINE_PASSED4 = 0.000001
+
+BALANCE_LINE = 0.5
+
+
 BALANCE_LINE_PASSED = 0
 #计算通过率
 for item in sortStockList:
@@ -232,10 +254,36 @@ for item in sortStockList:
         BUY_LINE_PASSED+=1.0
     if item[1]<SELL_LINE:
         SELL_LINE_PASSED+=1.0
+    
+    if item[1]>BUY_LINE1:
+        BUY_LINE_PASSED1+=1.0
+    if item[1]<SELL_LINE1:
+        SELL_LINE_PASSED1+=1.0
+    
+    if item[1]>BUY_LINE2:
+        BUY_LINE_PASSED2+=1.0
+    if item[1]<SELL_LINE2:
+        SELL_LINE_PASSED2+=1.0    
+        
+    if item[1]>BUY_LINE3:
+        BUY_LINE_PASSED3+=1.0
+    if item[1]<SELL_LINE3:
+        SELL_LINE_PASSED3+=1.0
+
+    if item[1]>BUY_LINE4:
+        BUY_LINE_PASSED4+=1.0
+    if item[1]<SELL_LINE4:
+        SELL_LINE_PASSED4+=1.0            
+    
     if item[1]>BALANCE_LINE:
         BALANCE_LINE_PASSED+=1.0
 print('\n')
-print('Buy(%d)/Sell(%d) Line Pass Ratio: %f' %(BUY_LINE_PASSED, SELL_LINE_PASSED, BUY_LINE_PASSED/SELL_LINE_PASSED))
+print('Buy(%d)/Sell(%d) Line(%f,%f) Pass Ratio: %f' %(BUY_LINE_PASSED, SELL_LINE_PASSED, BUY_LINE, SELL_LINE, BUY_LINE_PASSED/SELL_LINE_PASSED))
+print('Buy(%d)/Sell(%d) Line(%f,%f) Pass Ratio: %f' %(BUY_LINE_PASSED1, SELL_LINE_PASSED1, BUY_LINE1, SELL_LINE1, BUY_LINE_PASSED1/SELL_LINE_PASSED1))
+print('Buy(%d)/Sell(%d) Line(%f,%f) Pass Ratio: %f' %(BUY_LINE_PASSED2, SELL_LINE_PASSED2, BUY_LINE2, SELL_LINE2, BUY_LINE_PASSED2/SELL_LINE_PASSED2))
+print('Buy(%d)/Sell(%d) Line(%f,%f) Pass Ratio: %f' %(BUY_LINE_PASSED3, SELL_LINE_PASSED3, BUY_LINE3, SELL_LINE3, BUY_LINE_PASSED3/SELL_LINE_PASSED3))
+print('Buy(%d)/Sell(%d) Line(%f,%f) Pass Ratio: %f' %(BUY_LINE_PASSED4, SELL_LINE_PASSED4, BUY_LINE4, SELL_LINE4, BUY_LINE_PASSED4/SELL_LINE_PASSED4))
+
 print('Balance Pass Percent: %0.2f%%' %(BALANCE_LINE_PASSED/len(sortStockList)*100.0))
 
 #计算预期仓位分别
