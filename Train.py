@@ -87,7 +87,7 @@ cross_entropy = tf.reduce_mean(-tf.reduce_sum(ys * tf.log(tf.clip_by_value(predi
                                               reduction_indices=[1]))
 
 global_step = tf.Variable(0)
-learning_rate = tf.train.exponential_decay(1e-3, global_step, 21226, 0.97)
+learning_rate = tf.train.exponential_decay(1e-3, global_step, 21226, 0.9)
 
 train_step = tf.train.AdamOptimizer(learning_rate).minimize(cross_entropy, global_step=global_step)
 
@@ -113,6 +113,7 @@ if ckpt and ckpt.model_checkpoint_path:
     saver.restore(sess, ckpt.model_checkpoint_path)
     print('Network Restore ok! ...')
 
+minimize_test_cross_entropy = 2.0
 train_cross_entropy_list = []
 test_cross_entropy_list = []
 
@@ -121,6 +122,9 @@ def TrainingDataProcess(trainData, labelData, rowReaded, epochCount, trainCount)
     if trainCount % 50 == 0:
         trainSetAccuracy,train_cross_entropy = ComputeAccuracy(trainData,labelData)
         testSetAccuracy,test_cross_entropy = ComputeAccuracy(testData1,labelData1)
+        global minimize_test_cross_entropy
+        if test_cross_entropy<minimize_test_cross_entropy:
+            minimize_test_cross_entropy = test_cross_entropy
         trainSetAccuracy*=100
         testSetAccuracy*=100
         train_cross_entropy_list.append(train_cross_entropy)
@@ -150,10 +154,10 @@ def Plot():
     plt.ylabel('Cross Entropy')
     plt.plot(train_cross_entropy_list, color=[1,0,0], label='TrainSet')
     plt.plot(test_cross_entropy_list, color=[0,0,1], label='TestSet')
+    plt.axhline(minimize_test_cross_entropy, color= [0,0,0])
     plt.legend()
     plt.show()
     plt.close()
-
 
 myTrainData.LoopData(200, 1000, TrainingDataProcess)
 

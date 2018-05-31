@@ -107,6 +107,8 @@ def isstockst(code):
     name = stocktonames[code]
     if 'ST' in name:
         return True
+    if '退市' in name:
+        return True
     return False
 
 def isrisestop(kdatapart):
@@ -117,6 +119,7 @@ def isrisestop(kdatapart):
     return False
 
 KDAYS = 16
+#TODAY_STR = str(date.today() - datetime.timedelta(days=1))
 TODAY_STR = str(date.today())
 print('Today is %s' %TODAY_STR)
 

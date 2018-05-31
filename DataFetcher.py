@@ -71,7 +71,7 @@ for code in INDEX_LIST:
         #data process
         TRAIN_DAYS = 16
         PERDICT_DAYS = 1
-        RANGE_END = rows-TRAIN_DAYS-PERDICT_DAYS+1
+        RANGE_END = rows-TRAIN_DAYS-PERDICT_DAYS+1-1
         
         if rows<=TRAIN_DAYS+(PERDICT_DAYS-1):
             continue
@@ -91,12 +91,12 @@ for code in INDEX_LIST:
         table['UP'] = None
         table['DOWN'] = None
                     
-        checkall = df['close']
+        checkall = df['open']
         checkall1 = df['open']
                 
         for i in range(0, RANGE_END):
            
-            check_next = float(checkall[i+TRAIN_DAYS+PERDICT_DAYS-1])
+            check_next = float(checkall[i+TRAIN_DAYS+PERDICT_DAYS-1+1])
             check_prev = float(checkall1[i+TRAIN_DAYS+PERDICT_DAYS-1])
             
             growth = check_next / check_prev - 1
